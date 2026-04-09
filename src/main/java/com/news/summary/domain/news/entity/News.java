@@ -23,6 +23,7 @@ public class News {
     @Column(nullable = false)
     private String url;
 
+    private String urlToImage;
     private String source;
     private String category;
 
@@ -39,12 +40,13 @@ public class News {
         this.createdAt = LocalDateTime.now();
     }
 
-    public static News of(String title, String url, String source,
+    public static News of(String title, String url, String source, String urlToImage,
                           String category, LocalDateTime publishedAt) {
         News news = new News();
         news.title = title;
         news.url = url;
         news.source = source;
+        news.urlToImage = urlToImage;
         news.category = category;
         news.publishedAt = publishedAt;
         return news;

@@ -1,11 +1,13 @@
-package com.news.summary.common.config;
+package com.news.summary.common.client;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.util.Map;
 
 @Slf4j
@@ -16,42 +18,44 @@ public class ApiClient {
 
     private final WebClient webClient;
 
-    /*
-     * GET
+    /**
+     * baseURL + path 조합
+     * @param baseUrl
+     * @param path
+     * @param responseType
+     * @return
+     * @param <T>
      */
-    public <T> T get(String url, Class<T> responseType) {
+    public <T> T get(String baseUrl, String path, Class<T> responseType) {
+
+        String fullUrl = baseUrl + path;
+
         return webClient.get()
-                .uri(url)
+                .uri(URI.create(fullUrl)) // 🔥 핵심
                 .retrieve()
-                .onStatus(status -> status.isError(), response ->
-                        response.bodyToMono(String.class)
-                                .map(errorBody -> {
-                                    log.error("GET ERROR - url: {}, body: {}", url, errorBody);
-                                    return new RuntimeException("외부 API GET 호출 실패");
-                                })
-                )
                 .bodyToMono(responseType)
                 .block();
     }
 
-    /*
-     * GET (QueryParam 포함)
+    /**
+     * QueryParam
+     * @param baseUrl
+     * @param path
+     * @param queryParams
+     * @param responseType
+     * @return
+     * @param <T>
      */
-    public <T> T get(String url, Map<String, Object> queryParams, Class<T> responseType) {
+    public <T> T get(String baseUrl, String path, Map<String, Object> queryParams, Class<T> responseType) {
+
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromHttpUrl(baseUrl + path);
+
+        queryParams.forEach(builder::queryParam);
+
         return webClient.get()
-                .uri(uriBuilder -> {
-                    uriBuilder.path(url);
-                    queryParams.forEach(uriBuilder::queryParam);
-                    return uriBuilder.build();
-                })
+                .uri(builder.build().toUri()) // 🔥 안전
                 .retrieve()
-                .onStatus(status -> status.isError(), response ->
-                        response.bodyToMono(String.class)
-                                .map(errorBody -> {
-                                    log.error("GET PARAM ERROR - url: {}, params: {}, body: {}", url, queryParams, errorBody);
-                                    return new RuntimeException("외부 API GET 호출 실패");
-                                })
-                )
                 .bodyToMono(responseType)
                 .block();
     }

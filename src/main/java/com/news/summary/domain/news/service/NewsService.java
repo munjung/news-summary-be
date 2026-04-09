@@ -43,6 +43,7 @@ public class NewsService {
             News news = News.of(
                     article.getTitle(),
                     article.getUrl(),
+                    article.getUrlToImage(),
                     sourceName,
                     "business",
                     publishedAt

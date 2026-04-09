@@ -17,12 +17,15 @@ public class NewsApiResponse {
     public static class ArticleDto {
         private SourceDto source;
         private String title;
+        private String description;
         private String url;
+        private String urlToImage;
         private String publishedAt;
 
         @Getter
         @JsonIgnoreProperties(ignoreUnknown = true)
         public static class SourceDto {
+            private String id;
             private String name;
         }
     }

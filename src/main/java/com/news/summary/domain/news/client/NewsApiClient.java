@@ -1,6 +1,6 @@
 package com.news.summary.domain.news.client;
 
-import com.news.summary.common.config.ApiClient;
+import com.news.summary.common.client.ApiClient;
 import com.news.summary.common.exception.BusinessException;
 import com.news.summary.common.exception.ErrorCode;
 import com.news.summary.domain.news.dto.NewsApiResponse;
@@ -21,6 +21,8 @@ public class NewsApiClient {
 
     @Value("${news.api.key}")
     private String apiKey;
+    @Value("${news.api.base-url}")
+    private String baseUrl;
 
     public List<NewsApiResponse.ArticleDto> fetchEconomyNews() {
         Map<String, Object> params = Map.of(
@@ -31,6 +33,7 @@ public class NewsApiClient {
         );
 
         NewsApiResponse response = apiClient.get(
+                this.baseUrl,
                 "/top-headlines",
                 params,
                 NewsApiResponse.class
