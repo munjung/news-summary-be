@@ -21,8 +21,6 @@ public class NewsApiClient {
 
     @Value("${news.api.key}")
     private String apiKey;
-    @Value("${news.api.base-url}")
-    private String baseUrl;
 
     public List<NewsApiResponse.ArticleDto> fetchEconomyNews() {
         Map<String, Object> params = Map.of(
@@ -33,7 +31,6 @@ public class NewsApiClient {
         );
 
         NewsApiResponse response = apiClient.get(
-                this.baseUrl,
                 "/top-headlines",
                 params,
                 NewsApiResponse.class

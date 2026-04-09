@@ -23,6 +23,7 @@ public class News {
     @Column(nullable = false)
     private String url;
 
+    @Column(columnDefinition = "TEXT")
     private String urlToImage;
     private String source;
     private String category;

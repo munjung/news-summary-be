@@ -1,6 +1,7 @@
 package com.news.summary.domain.news.service;
 
 import com.news.summary.domain.news.client.NewsApiClient;
+import com.news.summary.domain.news.client.OpenAiClient;
 import com.news.summary.domain.news.dto.NewsApiResponse;
 import com.news.summary.domain.news.entity.News;
 import com.news.summary.domain.news.repository.NewsRepository;
@@ -20,6 +21,7 @@ public class NewsService {
 
     private final NewsRepository newsRepository;
     private final NewsApiClient newsApiClient;
+    private final OpenAiClient openAiClient;
 
     @Transactional
     public int fetchAndSaveNews() {
@@ -43,11 +45,20 @@ public class NewsService {
             News news = News.of(
                     article.getTitle(),
                     article.getUrl(),
-                    article.getUrlToImage(),
                     sourceName,
+                    article.getUrlToImage(),
                     "business",
                     publishedAt
             );
+
+            // GPT 요약 생성
+            try {
+                String summary = openAiClient.summarize(article.getTitle(), article.getUrl());
+                news.updateSummary(summary);
+            } catch (Exception e) {
+                log.warn("요약 생성 실패 - title: {}, error: {}", article.getTitle(), e.getMessage());
+            }
+
             this.newsRepository.save(news);
             savedCount++;
         }

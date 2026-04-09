@@ -1,70 +1,50 @@
 package com.news.summary.common.client;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriComponentsBuilder;
-
-import java.net.URI;
 import java.util.Map;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class ApiClient {
 
+    private final WebClient newsWebClient;
+    private final WebClient openAiWebClient;
 
-    private final WebClient webClient;
+    public ApiClient(
+            @Qualifier("newsWebClient") WebClient newsWebClient,
+            @Qualifier("openAiWebClient") WebClient openAiWebClient
+    ) {
+        this.newsWebClient = newsWebClient;
+        this.openAiWebClient = openAiWebClient;
+    }
 
-    /**
-     * baseURL + path 조합
-     * @param baseUrl
-     * @param path
-     * @param responseType
-     * @return
-     * @param <T>
-     */
-    public <T> T get(String baseUrl, String path, Class<T> responseType) {
-
-        String fullUrl = baseUrl + path;
-
-        return webClient.get()
-                .uri(URI.create(fullUrl)) // 🔥 핵심
+    // NewsApiClient에서 쓰는 메서드 — 그대로 유지
+    public <T> T get(String url, Map<String, Object> queryParams, Class<T> responseType) {
+        return newsWebClient.get()
+                .uri(uriBuilder -> {
+                    uriBuilder.path(url);
+                    queryParams.forEach(uriBuilder::queryParam);
+                    return uriBuilder.build();
+                })
                 .retrieve()
+                .onStatus(status -> status.isError(), response ->
+                        response.bodyToMono(String.class)
+                                .map(errorBody -> {
+                                    log.error("GET PARAM ERROR - url: {}, params: {}, body: {}", url, queryParams, errorBody);
+                                    return new RuntimeException("외부 API GET 호출 실패");
+                                })
+                )
                 .bodyToMono(responseType)
                 .block();
     }
 
-    /**
-     * QueryParam
-     * @param baseUrl
-     * @param path
-     * @param queryParams
-     * @param responseType
-     * @return
-     * @param <T>
-     */
-    public <T> T get(String baseUrl, String path, Map<String, Object> queryParams, Class<T> responseType) {
-
-        UriComponentsBuilder builder = UriComponentsBuilder
-                .fromHttpUrl(baseUrl + path);
-
-        queryParams.forEach(builder::queryParam);
-
-        return webClient.get()
-                .uri(builder.build().toUri()) // 🔥 안전
-                .retrieve()
-                .bodyToMono(responseType)
-                .block();
-    }
-
-    /*
-     * POST
-     */
-    public <T, R> R post(String url, T requestBody, Class<R> responseType) {
-        return webClient.post()
+    // OpenAiClient에서 쓰는 메서드
+    public <T, R> R postToOpenAi(String url, T requestBody, Class<R> responseType) {
+        return openAiWebClient.post()
                 .uri(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestBody)
@@ -72,49 +52,11 @@ public class ApiClient {
                 .onStatus(status -> status.isError(), response ->
                         response.bodyToMono(String.class)
                                 .map(errorBody -> {
-                                    log.error("POST ERROR - url: {}, body: {}, error: {}", url, requestBody, errorBody);
-                                    return new RuntimeException("외부 API POST 호출 실패");
+                                    log.error("OPENAI POST ERROR - url: {}, body: {}", url, errorBody);
+                                    return new RuntimeException("OpenAI API 호출 실패");
                                 })
                 )
                 .bodyToMono(responseType)
-                .block();
-    }
-
-    /*
-     * PUT
-     */
-    public <T, R> R put(String url, T requestBody, Class<R> responseType) {
-        return webClient.put()
-                .uri(url)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(requestBody)
-                .retrieve()
-                .onStatus(status -> status.isError(), response ->
-                        response.bodyToMono(String.class)
-                                .map(errorBody -> {
-                                    log.error("PUT ERROR - url: {}, body: {}, error: {}", url, requestBody, errorBody);
-                                    return new RuntimeException("외부 API PUT 호출 실패");
-                                })
-                )
-                .bodyToMono(responseType)
-                .block();
-    }
-
-    /*
-     * DELETE
-     */
-    public void delete(String url) {
-        webClient.delete()
-                .uri(url)
-                .retrieve()
-                .onStatus(status -> status.isError(), response ->
-                        response.bodyToMono(String.class)
-                                .map(errorBody -> {
-                                    log.error("DELETE ERROR - url: {}, body: {}", url, errorBody);
-                                    return new RuntimeException("외부 API DELETE 호출 실패");
-                                })
-                )
-                .bodyToMono(Void.class)
                 .block();
     }
 }

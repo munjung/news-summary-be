@@ -25,6 +25,7 @@ news:
 openai:
   api:
     key: ${OPENAI_API_KEY}
+    base-url: https://api.openai.com/v1
 
 springdoc:
   swagger-ui:
