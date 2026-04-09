@@ -32,3 +32,6 @@ springdoc:
     operations-sorter: method
     tags-sorter: alpha
     path: /swagger
+
+cors:
+  allowed-origins: ${ALLOWED_ORIGINS}
