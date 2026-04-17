@@ -4,6 +4,7 @@ import com.news.summary.common.exception.BusinessException;
 import com.news.summary.common.exception.ErrorCode;
 import com.news.summary.domain.news.client.NewsApiClient;
 import com.news.summary.domain.news.client.OpenAiClient;
+import com.news.summary.domain.news.dto.NewsApiRequest;
 import com.news.summary.domain.news.dto.NewsApiResponse;
 import com.news.summary.domain.news.dto.NewsResponseDto;
 import com.news.summary.domain.news.entity.News;
@@ -51,13 +52,20 @@ public class NewsService {
         return NewsResponseDto.from(news);
     }
 
+
     /**
      * 뉴스 API, GPT 호출
      * @return
      */
     @Transactional
-    public int fetchAndSaveNews() {
-        List<NewsApiResponse.ArticleDto> articles = this.newsApiClient.fetchEconomyNews();
+    public int fetchAndSaveNews(NewsApiRequest newsApiRequest) {
+        List<NewsApiResponse.ArticleDto> articles;
+        if (newsApiRequest != null) {
+            articles = this.newsApiClient.fetchEconomyNewsByPeriod(newsApiRequest);
+        } else {
+            articles  = this.newsApiClient.fetchEconomyNews();
+        }
+
 
         int savedCount = 0;
         for (NewsApiResponse.ArticleDto article : articles) {

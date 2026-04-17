@@ -10,7 +10,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create   # 개발 중엔 create, 나중에 validate로 변경
+      ddl-auto: update   # 개발 중엔 create, 나중에 validate로 변경
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect

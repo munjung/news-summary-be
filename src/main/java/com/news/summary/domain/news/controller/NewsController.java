@@ -1,6 +1,7 @@
 package com.news.summary.domain.news.controller;
 
 import com.news.summary.common.response.ApiResponse;
+import com.news.summary.domain.news.dto.NewsApiRequest;
 import com.news.summary.domain.news.dto.NewsResponseDto;
 import com.news.summary.domain.news.service.NewsService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,7 +36,14 @@ public class NewsController {
     @Operation(summary = "뉴스 fetch", description = "NewsApi, OpenAI 연동")
     @PostMapping("/fetch")
     public ApiResponse<String> getFetchNewsApi() {
-        int count = this.newsService.fetchAndSaveNews();
+        int count = this.newsService.fetchAndSaveNews(null);
+        return ApiResponse.success(count + "건 저장되었습니다.");
+    }
+
+    @Operation(summary = "특정기간 news 정보 fetch", description = "NewsApi, OpenAI 연동")
+    @PostMapping("/fetch/period")
+    public ApiResponse<String> getFetchNewsApiByPeriod(@RequestBody NewsApiRequest newsApiRequest) {
+        int count = this.newsService.fetchAndSaveNews(newsApiRequest);
         return ApiResponse.success(count + "건 저장되었습니다.");
     }
 
