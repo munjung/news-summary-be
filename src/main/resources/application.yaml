@@ -30,3 +30,13 @@ openai:
   api:
     key: ${OPENAI_API_KEY}
     base-url: https://api.openai.com/v1
+
+springdoc:
+  swagger-ui:
+    operations-sorter: method
+    tags-sorter: alpha
+    path: /swagger
+
+cors:
+  allowed-origins: ${ALLOWED_ORIGINS}
+  base-url: https://api.openai.com/v1
