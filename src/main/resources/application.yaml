@@ -5,11 +5,11 @@ spring:
     name: news-summary
 
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: none
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
         default_schema: newsfeeds
     show-sql: true
