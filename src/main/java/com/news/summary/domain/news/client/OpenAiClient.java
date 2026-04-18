@@ -18,7 +18,7 @@ public class OpenAiClient {
 
     public String summarize(String title, String url) {
         String prompt = """
-            아래 경제 뉴스 제목을 보고 한국어로 3줄 요약해줘.
+            아래 경제 뉴스 제목을 보고 한국어로 5줄내로 요약해줘.
             핵심 내용, 시장 영향, 투자자 관점에서 간결하게 작성해.
             
             제목: %s
